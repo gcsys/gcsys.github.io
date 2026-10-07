@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Un rendez-vous ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout : une carte-billet centrée, une question par écran, un « billet de rendez-vous » à la fin. Univers volontairement unique (papier rose bonbon), pas de thème sombre. */
+:root {
+  --paper: #ffe3ec;
+  --card: #fffaf5;
+  --ink: #2b1838;
+  --cherry: #e6304f;
+  --cherry-deep: #b81c3a;
+  --butter: #ffd65c;
+  --mint: #b8ecd7;
+  --muted: #7d5a74;
+  --line: #f2c2d1;
+  --f-display: "Shrikhand", "Cooper Black", Georgia, serif;
+  --f-body: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-hand: "Caveat", "Segoe Print", cursive;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--paper);
+  background-image: radial-gradient(var(--line) 1.4px, transparent 1.6px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  padding-inline: 16px;
+  padding-block: 24px;
+  overflow-x: hidden;
+}
+.wrap { max-width: 520px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+.top { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
+.dots i.on { background: var(--cherry); transform: scale(1.15); }
+.card {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 6px 7px 0 var(--ink);
+  padding: 28px 22px 24px;
+  position: relative;
+}
+.step { display: flex; flex-direction: column; gap: 18px; animation: pop .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform: translateY(14px) scale(.97); opacity: .3; } to { transform: none; opacity: 1; } }
+.kicker { font-family: var(--f-hand); font-size: 24px; color: var(--cherry); line-height: 1; }
+h1, h2 { font-family: var(--f-display); font-weight: 400; margin: 0; line-height: 1.08; text-wrap: balance; }
+h1 { font-size: clamp(32px, 9vw, 44px); }
+h2 { font-size: clamp(26px, 7vw, 34px); }
+p { margin: 0; line-height: 1.5; color: var(--muted); }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn {
+  font: 800 18px/1 var(--f-body);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 15px 28px;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--ink);
+  transition: transform .12s, box-shadow .12s, font-size .25s, padding .25s;
+}
+.btn:active { transform: translate(3px, 4px); box-shadow: 0 0 0 var(--ink); }
+.btn:focus-visible, .chip:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--butter); outline-offset: 3px; }
+.btn.yes { background: var(--cherry); color: #fff; }
+.btn.yes:hover { background: var(--cherry-deep); }
+.btn.next { background: var(--ink); color: var(--card); width: 100%; }
+.btn.next:disabled { opacity: .35; cursor: not-allowed; }
+.btn.no { position: relative; transition: transform .2s; }
+.btn.no.flee { position: fixed; z-index: 20; transition: left .22s ease-out, top .22s ease-out; }
+.nohint { font-family: var(--f-hand); font-size: 22px; color: var(--cherry); min-height: 1.2em; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 380px) { .grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chip {
+  font: 600 15px/1.2 var(--f-body);
+  color: var(--ink);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  padding: 12px 10px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center;
+  transition: background .15s, transform .15s;
+  min-width: 0;
+}
+.chip .em { font-size: 26px; line-height: 1; }
+.chip.big { font-size: 17px; font-weight: 800; padding: 16px 10px; }
+.chip.big .em { font-size: 34px; }
+.chip small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.chip:hover { transform: rotate(-1.5deg); }
+.chip[aria-pressed="true"] { background: var(--butter); box-shadow: 3px 3px 0 var(--ink); }
+label.field { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 14px; }
+input[type="date"], input[type="time"], textarea {
+  font: 600 17px var(--f-body);
+  color: var(--ink);
+  background: var(--card);
+  border: 2px dashed var(--ink);
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+}
+textarea { font-weight: 400; resize: vertical; min-height: 80px; }
+.sliderbox { display: flex; flex-direction: column; gap: 8px; }
+input[type="range"] { width: 100%; accent-color: var(--cherry); }
+.slider-val { font-family: var(--f-hand); font-size: 26px; color: var(--cherry); text-align: center; }
+.scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.back { background: none; border: 0; color: var(--muted); font: 600 14px var(--f-body); cursor: pointer; align-self: flex-start; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; }
+.foot { text-align: center; font-family: var(--f-hand); font-size: 20px; color: var(--muted); }
+
+/* Billet final */
+.ticket {
+  border: 2px dashed var(--ink);
+  border-radius: 16px;
+  padding: 18px;
+  background: var(--paper);
+  display: grid;
+  gap: 10px;
+}
+.ticket .t-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-bottom: 2px dashed var(--ink); padding-bottom: 10px; }
+.ticket .t-head b { font-family: var(--f-display); font-weight: 400; font-size: 19px; line-height: 1.15; }
+.ticket .t-head span { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ticket dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; }
+.ticket dt { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.ticket dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.stamp {
+  position: absolute; top: -18px; right: -10px;
+  background: var(--mint); border: 2.5px solid var(--ink); border-radius: 50%;
+  width: 84px; height: 84px; display: grid; place-items: center; text-align: center;
+  font-family: var(--f-display); font-size: 15px; line-height: 1; transform: rotate(14deg);
+}
+.copied { font-family: var(--f-hand); font-size: 22px; color: var(--cherry); min-height: 1.2em; text-align: center; }
+#fallback { width: 100%; min-height: 160px; font-size: 14px; }
+canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; width: 100%; height: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .step { animation: none; }
+  .btn.no.flee { transition: none; }
+}
+</style>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<main class="wrap">
+  <div class="top">
+    <span id="counter">1 / 6</span>
+    <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <section class="card" id="card" aria-live="polite"></section>
+  <div class="foot">les meilleurs rendez-vous commencent ici ♥</div>
+</main>
+
+<script>
+// ——— À personnaliser ———
+const DE = "Gaël";            // qui envoie l'invitation
+// ————————————————
+
+const answers = { jour: null, heure: null, mode: null, manger: [], sport: [], apres: [], chic: 3, allure: 1, note: "" };
+let step = 0;
+let noTries = 0;
+const card = document.getElementById("card");
+const TOTAL = 6;
+
+function el(html) { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+function joli(isoStr) {
+  const [y, m, d] = isoStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  return JOURS[dt.getDay()] + " " + d + " " + MOIS[m - 1];
+}
+function prochain(jourIdx) {
+  const d = new Date(); d.setHours(12, 0, 0, 0);
+  let diff = (jourIdx - d.getDay() + 7) % 7; if (diff === 0) diff = 7;
+  d.setDate(d.getDate() + diff); return d;
+}
+
+const NO_LINES = [
+  "Oups, il est un peu timide…",
+  "Il a eu peur, réessaie ?",
+  "Ce bouton ne marche plus, désolé.",
+  "Tu es sûre ? Vraiment sûre ?",
+  "Le bouton Oui, lui, t'attend.",
+  "Bon. On sait tous les deux comment ça finit.",
+];
+
+const MANGER = [
+  ["🍕", "Pizza"], ["🍣", "Sushis"], ["🍔", "Burger"], ["🥞", "Crêpes"],
+  ["🍜", "Ramen"], ["🌮", "Tacos"], ["🧀", "Raclette"], ["🥗", "Un truc healthy"],
+  ["🎲", "Surprends-moi"],
+];
+const APRES = [
+  ["🎬", "Ciné"], ["🌙", "Balade"], ["🎳", "Bowling"], ["🎤", "Karaoké"],
+  ["🖼️", "Expo"], ["🍸", "Cocktails"], ["🧩", "Jeux de société"], ["🍦", "Glace"],
+  ["🛋️", "Canapé et film"],
+];
+const CHIC = ["Jogging assumé", "Jean et baskets", "Petite tenue sympa", "On se fait beaux", "Tapis rouge"];
+const HEURES = [["🌅", "Lever du soleil", "07:30"], ["☕", "Le matin", "09:30"], ["🥐", "Brunch", "11:00"], ["🍰", "Goûter", "16:00"], ["🥂", "Apéro", "18:30"], ["🕯️", "Dîner", "20:00"]];
+const SPORT = [
+  ["🐢", "Footing tranquille"], ["⛰️", "Séance de côtes"], ["⏱️", "Fractionné"],
+  ["🥾", "Rando machtou pichtou"], ["🛣️", "Sortie longue"], ["🎲", "Surprends-moi"],
+];
+const APRES_SPORT = [
+  ["🥐", "Petit-déj"], ["🍳", "Brunch"], ["🥤", "Smoothie"], ["🥞", "Crêpes"],
+  ["🍕", "Pizza"], ["🍺", "Une bière méritée"], ["🌊", "Baignade"], ["🧘", "Étirements"],
+  ["😴", "Sieste"],
+];
+const ALLURE = ["On marche, ça compte", "On papote en courant", "Rythme sympa", "Ça pique un peu", "On se bat pour le Strava"];
+
+function updateTop() {
+  document.getElementById("counter").textContent = Math.min(step + 1, TOTAL) + " / " + TOTAL;
+  document.querySelectorAll("#dots i").forEach((d, i) => d.classList.toggle("on", i <= step));
+}
+
+function render() {
+  resetNo();
+  updateTop();
+  card.innerHTML = "";
+  card.appendChild([s1, s2, s3, s4, s5, s6][step]());
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function go(n) { step = n; render(); }
+function backBtn() {
+  const b = el('<button class="back" type="button">← revenir</button>');
+  b.onclick = () => go(step - 1); return b;
+}
+
+/* 1. La question */
+function s1() {
+  const s = el(`<div class="step">
+    <div class="kicker">question très sérieuse</div>
+    <h1>Est-ce que tu veux sortir avec moi&nbsp;?</h1>
+    <p>Réponds honnêtement. Il y a une bonne réponse, évidemment.</p>
+    <div class="row"><button class="btn yes" id="yes" type="button">Oui !</button><button class="btn no" id="no" type="button">Non</button></div>
+    <div class="nohint" id="nohint"></div>
+  </div>`);
+  const yes = s.querySelector("#yes"), no = s.querySelector("#no");
+  yes.onclick = () => { burst(); go(1); };
+  const fuir = (e) => {
+    if (e) e.preventDefault();
+    noTries++;
+    s.querySelector("#nohint").textContent = NO_LINES[Math.min(noTries - 1, NO_LINES.length - 1)];
+    yes.style.fontSize = Math.min(18 + noTries * 4, 42) + "px";
+    yes.style.padding = Math.min(15 + noTries * 3, 32) + "px " + Math.min(28 + noTries * 5, 60) + "px";
+    no.textContent = ["Non", "Non ?", "Euh…", "Nan…", "Hmm", "…"][Math.min(noTries, 5)];
+    if (noTries >= 7) { no.remove(); s.querySelector("#nohint").textContent = "Le bouton Non a démissionné. Il ne reste qu'une option."; return; }
+    const r = no.getBoundingClientRect();
+    if (!no.classList.contains("flee")) {
+      no.style.left = r.left + "px"; no.style.top = r.top + "px";
+      no.classList.add("flee");
+    }
+    const pad = 16, w = r.width, h = r.height;
+    const maxX = window.innerWidth - w - pad, maxY = window.innerHeight - h - pad;
+    let x, y, tries = 0;
+    do { x = pad + Math.random() * Math.max(0, maxX - pad); y = pad + Math.random() * Math.max(0, maxY - pad); tries++; }
+    while (tries < 20 && Math.hypot(x - r.left, y - r.top) < 120);
+    requestAnimationFrame(() => { no.style.left = x + "px"; no.style.top = y + "px"; });
+  };
+  no.addEventListener("mouseenter", fuir);
+  no.addEventListener("touchstart", fuir, { passive: false });
+  no.addEventListener("click", fuir);
+  return s;
+}
+function resetNo() { document.querySelectorAll(".btn.no.flee").forEach(b => b.remove()); }
+
+/* 2. Le jour */
+function s2() {
+  const opts = [["Ce vendredi", prochain(5)], ["Ce samedi", prochain(6)], ["Ce dimanche", prochain(0)]];
+  const s = el(`<div class="step">
+    <div class="kicker">yesss. bon, organisons ça</div>
+    <h2>Quel jour ça t'arrange&nbsp;?</h2>
+    <div class="grid three" id="g"></div>
+    <label class="field" for="date">Ou choisis une date précise
+      <input type="date" id="date" min="${iso(new Date())}">
+    </label>
+    <button class="btn next" id="nx" type="button" disabled>Suivant</button>
+  </div>`);
+  const g = s.querySelector("#g"), date = s.querySelector("#date"), nx = s.querySelector("#nx");
+  const sync = () => { nx.disabled = !answers.jour; g.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.v === answers.jour)); date.value = answers.jour || ""; };
+  opts.forEach(([lab, d]) => {
+    const c = el(`<button class="chip" type="button" data-v="${iso(d)}">${lab}<small>${d.getDate()} ${MOIS[d.getMonth()]}</small></button>`);
+    c.onclick = () => { answers.jour = c.dataset.v; sync(); };
+    g.appendChild(c);
+  });
+  date.onchange = () => { answers.jour = date.value || null; sync(); };
+  nx.onclick = () => go(2);
+  sync();
+  s.prepend(backBtn());
+  return s;
+}
+
+/* 3. L'heure */
+function s3() {
+  const s = el(`<div class="step">
+    <div class="kicker">le ${esc(joli(answers.jour))}, noté</div>
+    <h2>À quelle heure&nbsp;?</h2>
+    <div class="grid" id="g"></div>
+    <label class="field" for="heure">Ou une heure précise
+      <input type="time" id="heure" step="900">
+    </label>
+    <button class="btn next" id="nx" type="button" disabled>Suivant</button>
+  </div>`);
+  const g = s.querySelector("#g"), t = s.querySelector("#heure"), nx = s.querySelector("#nx");
+  const sync = () => { nx.disabled = !answers.heure; g.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.v === answers.heure)); t.value = answers.heure || ""; };
+  HEURES.forEach(([em, lab, h]) => {
+    const c = el(`<button class="chip" type="button" data-v="${h}"><span class="em">${em}</span>${lab}<small>${h.replace(":", "h")}</small></button>`);
+    c.onclick = () => { answers.heure = h; sync(); };
+    g.appendChild(c);
+  });
+  t.onchange = () => { answers.heure = t.value || null; sync(); };
+  nx.onclick = () => go(3);
+  sync();
+  s.prepend(backBtn());
+  return s;
+}
+
+function multi(list, key, title, kicker, next, hint, nested) {
+  const s = el(`<div class="step"${nested ? ' style="animation-duration:.3s"' : ""}>
+    ${kicker ? `<div class="kicker">${kicker}</div>` : ""}
+    <h2>${title}</h2>
+    <p>${hint}</p>
+    <div class="grid three" id="g"></div>
+    <button class="btn next" id="nx" type="button" disabled>Suivant</button>
+  </div>`);
+  const g = s.querySelector("#g"), nx = s.querySelector("#nx");
+  const sync = () => { nx.disabled = answers[key].length === 0; g.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", answers[key].includes(c.dataset.v))); };
+  list.forEach(([em, lab]) => {
+    const c = el(`<button class="chip" type="button" data-v="${lab}"><span class="em">${em}</span>${lab}</button>`);
+    c.onclick = () => { const a = answers[key]; const i = a.indexOf(lab); i < 0 ? a.push(lab) : a.splice(i, 1); sync(); };
+    g.appendChild(c);
+  });
+  nx.onclick = () => go(next);
+  sync();
+  if (!nested) s.prepend(backBtn());
+  return s;
+}
+
+/* 4. On mange ou on bouge */
+function s4() {
+  const s = el(`<div class="step">
+    <div class="kicker">le programme</div>
+    <h2>On commence par quoi&nbsp;?</h2>
+    <div class="grid" id="mode">
+      <button class="chip big" type="button" data-v="manger"><span class="em">🍽️</span>On mange<small>le plus important</small></button>
+      <button class="chip big" type="button" data-v="bouger"><span class="em">👟</span>On bouge direct<small>on mangera après</small></button>
+    </div>
+    <div id="sub"></div>
+  </div>`);
+  const sub = s.querySelector("#sub");
+  const show = () => {
+    s.querySelectorAll("#mode .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.v === answers.mode));
+    sub.innerHTML = "";
+    if (!answers.mode) return;
+    const inner = answers.mode === "manger"
+      ? multi(MANGER, "manger", "On mange quoi&nbsp;?", "", 4, "Plusieurs choix possibles, je ne juge pas.", true)
+      : multi(SPORT, "sport", "On fait quelle sortie&nbsp;?", "", 4, "Plusieurs choix possibles, on adaptera aux jambes.", true);
+    if (answers.mode === "bouger") inner.insertBefore(slider("allure", ALLURE, "Allure souhaitée", "<span>escargot</span><span>Kipchoge</span>"), inner.querySelector("#nx"));
+    sub.appendChild(inner);
+  };
+  s.querySelectorAll("#mode .chip").forEach(c => c.onclick = () => { if (answers.mode !== c.dataset.v) answers.apres = []; answers.mode = c.dataset.v; show(); });
+  show();
+  s.prepend(backBtn());
+  return s;
+}
+
+/* 5. Après + tenue + petit mot */
+function s5() {
+  const sport = answers.mode === "bouger";
+  const s = sport
+    ? multi(APRES_SPORT, "apres", "Et après l'effort&nbsp;?", "le réconfort", 5, "Choisis ce qui te tente.")
+    : multi(APRES, "apres", "Et après&nbsp;?", "la suite du programme", 5, "Choisis ce qui te tente.");
+  const extra = el(`<div class="step" style="animation:none;gap:18px">
+    <label class="field" for="note">Un truc à savoir&nbsp;? <span style="font-weight:400;color:var(--muted)">(allergie, envie, condition secrète…)</span>
+      <textarea id="note" placeholder="${sport ? "Ex. : je ne cours pas avant mon café." : "Ex. : je ne mange pas de coriandre, et je veux un dessert."}"></textarea>
+    </label>
+  </div>`);
+  if (!sport) extra.prepend(slider("chic", CHIC, "Niveau d'élégance", "<span>pyjama</span><span>gala</span>"));
+  const n = extra.querySelector("#note");
+  n.value = answers.note; n.oninput = () => { answers.note = n.value; };
+  s.insertBefore(extra, s.querySelector("#nx"));
+  return s;
+}
+
+function slider(key, labels, title, scale) {
+  const b = el(`<div class="sliderbox">
+    <label class="field" for="sl-${key}">${title}</label>
+    <input type="range" id="sl-${key}" min="0" max="4" step="1">
+    <div class="slider-val"></div>
+    <div class="scale">${scale}</div>
+  </div>`);
+  const r = b.querySelector("input"), v = b.querySelector(".slider-val");
+  r.value = answers[key]; v.textContent = labels[answers[key]];
+  r.oninput = () => { answers[key] = +r.value; v.textContent = labels[answers[key]]; };
+  return b;
+}
+
+/* 6. Le billet */
+function recapTexte() {
+  return [
+    "C'est oui ! 💌",
+    "📅 Le " + joli(answers.jour) + " à " + answers.heure.replace(":", "h"),
+    answers.mode === "bouger" ? "👟 On bouge : " + answers.sport.join(", ") : "🍽️ À manger : " + answers.manger.join(", "),
+    "✨ Ensuite : " + answers.apres.join(", "),
+    answers.mode === "bouger" ? "⏱️ Allure : " + ALLURE[answers.allure] : "👗 Tenue : " + CHIC[answers.chic],
+    answers.note.trim() ? "📝 " + answers.note.trim() : null,
+  ].filter(Boolean).join("\n");
+}
+function s6() {
+  const num = String(Math.floor(1000 + Math.random() * 9000));
+  const s = el(`<div class="step">
+    <div class="stamp">c'est<br>un date</div>
+    <div class="kicker">c'est officiel</div>
+    <h2>Tu viens de faire le meilleur choix de ta journée.</h2>
+    <div class="ticket">
+      <div class="t-head"><b>Billet de rendez-vous</b><span>N° ${num}</span></div>
+      <dl>
+        <dt>Quand</dt><dd>${esc(joli(answers.jour))} à ${esc(answers.heure.replace(":", "h"))}</dd>
+        ${answers.mode === "bouger"
+          ? `<dt>Sortie</dt><dd>${answers.sport.map(esc).join(", ")}</dd>`
+          : `<dt>Miam</dt><dd>${answers.manger.map(esc).join(", ")}</dd>`}
+        <dt>Ensuite</dt><dd>${answers.apres.map(esc).join(", ")}</dd>
+        ${answers.mode === "bouger"
+          ? `<dt>Allure</dt><dd>${esc(ALLURE[answers.allure])}</dd>`
+          : `<dt>Tenue</dt><dd>${esc(CHIC[answers.chic])}</dd>`}
+        ${answers.note.trim() ? `<dt>Note</dt><dd>${esc(answers.note.trim())}</dd>` : ""}
+        <dt>Avec</dt><dd>${esc(DE)}</dd>
+      </dl>
+    </div>
+    <p>Dernière étape : copie ta réponse et envoie-la à ${esc(DE)} par message.</p>
+    <button class="btn yes" id="copy" type="button" style="width:100%">Copier ma réponse</button>
+    <div class="copied" id="copied"></div>
+    <textarea id="fallback" readonly hidden></textarea>
+  </div>`);
+  const btn = s.querySelector("#copy"), msg = s.querySelector("#copied"), fb = s.querySelector("#fallback");
+  btn.onclick = () => {
+    const txt = recapTexte();
+    const fallback = () => { fb.hidden = false; fb.value = txt; fb.focus(); fb.select(); msg.textContent = "Sélectionne le texte ci-dessous et copie-le."; };
+    try {
+      navigator.clipboard.writeText(txt).then(() => { msg.textContent = "Copié ! Colle-le dans ta conversation avec " + DE + "."; burst(); }, fallback);
+    } catch (e) { fallback(); }
+  };
+  s.prepend(backBtn());
+  setTimeout(burst, 150);
+  return s;
+}
+
+/* Confettis maison */
+const cv = document.getElementById("confetti"), ctx = cv.getContext("2d");
+let parts = [], anim = null;
+const COLORS = ["#e6304f", "#ffd65c", "#b8ecd7", "#2b1838", "#ff8fab"];
+function burst() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
+  for (let i = 0; i < 140; i++) {
+    parts.push({
+      x: innerWidth / 2 + (Math.random() - .5) * 120, y: innerHeight * .45,
+      vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4,
+      r: 4 + Math.random() * 6, a: Math.random() * 6, va: (Math.random() - .5) * .4,
+      c: COLORS[i % COLORS.length], heart: Math.random() < .25, life: 0,
+    });
+  }
+  if (!anim) anim = requestAnimationFrame(tick);
+}
+function heart(x, y, s) {
+  ctx.beginPath(); ctx.moveTo(x, y + s * .3);
+  ctx.bezierCurveTo(x, y, x - s, y, x - s, y + s * .35);
+  ctx.bezierCurveTo(x - s, y + s * .8, x, y + s, x, y + s * 1.3);
+  ctx.bezierCurveTo(x, y + s, x + s, y + s * .8, x + s, y + s * .35);
+  ctx.bezierCurveTo(x + s, y, x, y, x, y + s * .3); ctx.fill();
+}
+function tick() {
+  const k = devicePixelRatio;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  parts.forEach(p => {
+    p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va; p.life++;
+    ctx.save(); ctx.scale(k, k); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c;
+    if (p.heart) heart(0, 0, p.r * .9); else ctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2);
+    ctx.restore();
+  });
+  parts = parts.filter(p => p.y < innerHeight + 40 && p.life < 400);
+  anim = parts.length ? requestAnimationFrame(tick) : (ctx.clearRect(0, 0, cv.width, cv.height), null);
+}
+
+render();
+</script>
+
+</body>
+</html>
